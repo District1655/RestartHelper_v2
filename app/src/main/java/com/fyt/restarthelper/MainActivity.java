@@ -67,6 +67,8 @@ public class MainActivity extends AppCompatActivity {
         if (isExternalCall) {
             if (targetPackage != null && !targetPackage.isEmpty()) {
                 restartTargetApp();
+                // 兜底：4秒后强制关闭，防止退到后台后finish不执行
+                new Handler(Looper.getMainLooper()).postDelayed(this::finish, 4000);
             } else {
                 Toast.makeText(this, "还未选择目标应用", Toast.LENGTH_SHORT).show();
             }
@@ -74,6 +76,8 @@ public class MainActivity extends AppCompatActivity {
             tvStatus.setText("即将自动重启...");
             new Handler(Looper.getMainLooper()).postDelayed(() -> {
                 restartTargetApp();
+                // 兜底：4秒后强制关闭
+                new Handler(Looper.getMainLooper()).postDelayed(this::finish, 4000);
             }, 1000);
         }
 
@@ -238,10 +242,10 @@ public class MainActivity extends AppCompatActivity {
                             | Intent.FLAG_ACTIVITY_CLEAR_TOP
                             | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                     startActivity(launchIntent);
-                    tvStatus.setText("重启成功！即将关闭...");
+                    tvStatus.setText("重启成功！");
                     Toast.makeText(MainActivity.this, "已重启应用", Toast.LENGTH_SHORT).show();
-                    // 重启成功后延迟关闭自身
-                    new Handler(Looper.getMainLooper()).postDelayed(this::finish, 1200);
+                    // 重启成功后立即关闭自身（避免退到后台后Handler被系统限制）
+                    new Handler(Looper.getMainLooper()).postDelayed(this::finish, 300);
                 } else {
                     tvStatus.setText("无法启动该应用（可能无启动界面）");
                     Toast.makeText(MainActivity.this, "无法启动该应用", Toast.LENGTH_SHORT).show();
